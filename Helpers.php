@@ -1,5 +1,65 @@
 <?php
 
+function slug(string $string): string
+{
+
+    $mapa['a'] = 'ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÕÕÖØÙÚÛÜüÝÞBàáããäåæçèéêëìíîïðñòóõõöøùúû@#$%&*()_-+{[}]/?¨|;:.,\\\'<>°◦ᵃ';
+    $mapa['b'] = 'aaaaaaaceeeeiiiidnoooooouuuuuybsaaaaaaaceeeeiiiidnoooooouuu                        ';
+    //converte/transcreve caracteres
+    $slug = strtr(mb_convert_encoding($string, 'ISO-8859-1', 'UTF-8'), mb_convert_encoding($mapa['a'], 'ISO-8859-1', 'UTF-8'), $mapa['b']);
+    $slug = strip_tags(trim($slug));
+    $slug = str_replace(' ', '-', $slug);
+    $slug = str_replace(['-----', '----', '---', '--', '-'], '-', $slug);
+
+    return strtolower($slug);
+}
+
+/**
+ * Retorna uma string com o dia e data atual
+ * @return string
+ */
+function dataAtual(): string
+{
+    $diaMes = date('d');
+    $diaSemana = date('w');
+    $mes = date('n') - 1;
+    $ano = date('Y');
+
+    $diasDaSemana = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-sexta', 'sábado'];
+
+    $nomesDosMeses = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+
+    $dataFormatada = $diasDaSemana[$diaSemana] . ', ' . $diaMes . ' de ' . $nomesDosMeses[$mes] . ' de ' . $ano;
+    return $dataFormatada;
+}
+
+/**
+ * Monta url de acordo com o ambiente
+ * @param string $url parte da url ex. admin
+ * @return string url completa
+ */
+function url(string $url): string
+{
+    $servidor = filter_input(INPUT_SERVER, 'SERVER_NAME');
+    $ambiente = ($servidor == 'localhost' ? URL_DESENVOLVIMENTO : URL_PRODUCAO);
+
+    if (str_starts_with($url, '/')) {
+        return $ambiente . $url;
+    }
+
+    return $ambiente . '/' . $url;
+}
+
+function localhost(): bool
+{
+    $servidor = filter_input(INPUT_SERVER, 'SERVER_NAME');
+
+    if (!$servidor == 'localhost') {
+        return true;
+    }
+    return false;
+}
+
 /**
  * Validar Url
  * @param string $url
@@ -92,12 +152,14 @@ function formatarNumero(int $numero = null): string
 
 function saudacao(): string
 {
-    echo $hora = date('H');
+    $hora = date('H');
 
     if ($hora >= 0 && $hora <= 5) {
         $saudacao = 'boa madrugada';
     } elseif ($hora >= 6 && $hora <= 12) {
         $saudacao = 'bom dia';
+    } elseif ($hora >= 13 && $hora <= 18) {
+        $saudacao = 'boa tarde';
     } else {
         $saudacao = 'boa noite';
     }
